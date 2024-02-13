@@ -1,5 +1,6 @@
 graph-data/*
 sat-data/*
+build/*
 results
 notes
 *.o
