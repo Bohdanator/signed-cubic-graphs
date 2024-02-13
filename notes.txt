@@ -1,0 +1,3 @@
+variable for each color and half-edge, 2*3*3*n/2
+half-edges that share an edge, couples with not.
+half-edges that share a vertex have different colors, couples with not.
