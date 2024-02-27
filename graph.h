@@ -7,7 +7,7 @@ using namespace std;
 
 struct Graph {
     vector<vector<int>> vertex; // <neighbor, edge>
-    vector<vector<int>> edges; // [u, v, sign, color]
+    vector<vector<int>> edges; // [u, v, sign]
     vector<vector<int>> adj_matrix;
 
     Graph() = default;
@@ -70,6 +70,36 @@ struct Graph {
         }
     }
 
+    void graph_to_dot_colors(ostream &stream, vector<pair<int, int>> colors) {
+        stream << "graph unsat_" << n() << "_" << m() << " {\n";
+        stream << "\tgraph [size=\"6,6\",ratio=fill];\n";
+        for (int i = 0; i < n(); i++)
+            stream << "\t" << i << " [shape=circle];\n";
+        for (int i = 0; i < m(); i++)
+            stream << "\t" << edges[i][0] << " -- " << edges[i][1] << (edges[i][2] > 0 ? " [style=dashed," : "[") << "headlabel=" << colors[i].first << ", taillabel=" << colors[i].second << "]" << ";\n";
+        stream << "}";
+    }
+
+    void graph_to_dot(ostream &stream) {
+        stream << "graph unsat_" << n() << "_" << m() << " {\n";
+        stream << "\tgraph [size=\"6,6\",ratio=fill];\n";
+        for (int i = 0; i < n(); i++)
+            stream << "\t" << i << " [shape=circle];\n";
+        for (int i = 0; i < m(); i++)
+            stream << "\t" << edges[i][0] << " -- " << edges[i][1] << (edges[i][2] > 0 ? " [style=dashed," : "[") << "]" << ";\n";
+        stream << "}";
+    }
+
+    void graph_to_dot_ST(ostream &stream, vector<bool> &ST) {
+        stream << "graph unsat_" << n() << "_" << m() << " {\n";
+        stream << "\tgraph [size=\"6,6\",ratio=fill];\n";
+        for (int i = 0; i < n(); i++)
+            stream << "\t" << i << " [shape=circle];\n";
+        for (int i = 0; i < m(); i++)
+            stream << "\t" << edges[i][0] << " -- " << edges[i][1] << (ST[i] ? "[style=bold, color=red" : (edges[i][2] > 0 ? " [style=dashed," : "[") )<< "]" << ";\n";
+        stream << "}";
+    }
+
     void signature(vector<int> &dest) {
         dest.resize(edges.size());
         for (int i = 0; i < edges.size(); i++) {
@@ -77,16 +107,8 @@ struct Graph {
         }
     }
 
-    void colors(vector<int> &dest) {
-        dest.resize(edges.size());
-        for (int i = 0; i < edges.size(); i++) {
-            dest[i] = edges[i][3];
-        }
-    }
-
     void adj(vector<vector<bool>> &matrix) {
         matrix.resize(n(), vector<bool>(n(), false));
-
     }
 };
 

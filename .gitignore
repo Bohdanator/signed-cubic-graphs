@@ -1,5 +1,7 @@
 graph-data/*
 sat-data/*
+images/*
+dumps/*
 build/*
 results
 notes
