@@ -1,0 +1,23 @@
+graph unsat_8_12 {
+	graph [size="6,6",ratio=fill];
+	0 [shape=circle];
+	1 [shape=circle];
+	2 [shape=circle];
+	3 [shape=circle];
+	4 [shape=circle];
+	5 [shape=circle];
+	6 [shape=circle];
+	7 [shape=circle];
+	0 -- 1[headlabel=0, taillabel=0];
+	0 -- 2[headlabel=-1, taillabel=-1];
+	0 -- 3[headlabel=1, taillabel=1];
+	1 -- 4[headlabel=-1, taillabel=-1];
+	1 -- 5[headlabel=1, taillabel=1];
+	2 -- 4[headlabel=1, taillabel=1];
+	2 -- 6[headlabel=0, taillabel=0];
+	3 -- 5 [style=dashed,headlabel=0, taillabel=0];
+	3 -- 6 [style=dashed,headlabel=1, taillabel=-1];
+	4 -- 7[headlabel=0, taillabel=0];
+	5 -- 7 [style=dashed,headlabel=1, taillabel=-1];
+	6 -- 7[headlabel=-1, taillabel=-1];
+}// SAT

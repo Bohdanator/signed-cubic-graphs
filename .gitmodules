@@ -1,0 +1,9 @@
+[submodule "kissat"]
+	path = kissat
+	url = git@github.com:arminbiere/kissat.git
+[submodule "cadical"]
+	path = cadical
+	url = git@github.com:arminbiere/cadical.git
+[submodule "cryptominisat"]
+	path = cryptominisat
+	url = git@github.com:msoos/cryptominisat.git

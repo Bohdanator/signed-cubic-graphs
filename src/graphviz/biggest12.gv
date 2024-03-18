@@ -1,0 +1,33 @@
+graph unsat_12_18 {
+	graph [size="6,6",ratio=fill];
+	0 [shape=circle];
+	1 [shape=circle];
+	2 [shape=circle];
+	3 [shape=circle];
+	4 [shape=circle];
+	5 [shape=circle];
+	6 [shape=circle];
+	7 [shape=circle];
+	8 [shape=circle];
+	9 [shape=circle];
+	10 [shape=circle];
+	11 [shape=circle];
+	0 -- 1[];
+	0 -- 2[];
+	0 -- 3[];
+	1 -- 2[];
+	1 -- 3[];
+	2 -- 4[];
+	3 -- 4[];
+	4 -- 5[];
+	5 -- 6[];
+	5 -- 7[];
+	6 -- 8[];
+	6 -- 9[];
+	7 -- 10[];
+	7 -- 11[];
+	8 -- 9[];
+	8 -- 10[];
+	9 -- 11[];
+	10 -- 11[];
+}

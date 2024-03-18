@@ -2,6 +2,12 @@
     "files.associations": {
         "bitset": "cpp",
         "string_view": "cpp",
-        "stacktrace": "cpp"
-    }
+        "stacktrace": "cpp",
+        "iostream": "cpp"
+    },
+    "C_Cpp.default.compilerPath": "/usr/bin/g++",
+    "cSpell.enableFiletypes": [
+        "!c",
+        "!cpp"
+    ]
 }
