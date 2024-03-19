@@ -4,6 +4,7 @@ sat-data/*
 images/*
 dumps/*
 build/*
+graphviz/*
 results
 notes
 *.o
