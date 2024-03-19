@@ -1,8 +1,9 @@
 #include<bits/stdc++.h>
-#include "graph.h"
+#include "graph.hpp"
+#include "graph_utils.hpp"
 
 int main() {
     Graph graph;
-    graph.parse_from_stream(cin);
-    graph.graph_to_dot(cout);
+    parse_graph(graph, cin);
+    graph_to_dot(graph, cout);
 }

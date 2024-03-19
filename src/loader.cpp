@@ -1,5 +1,5 @@
 #include<bits/stdc++.h>
-#include "graph.h"
+#include "graph.hpp"
 
 using namespace std;
 
@@ -9,7 +9,7 @@ void load_graph(istream& fin, Graph &graph) {
     getline(fin, buf); // Graph x, blablabla, we don't need this
     getline(fin, buf);
     int n = buf.size();
-    graph = Graph(n);
+    graph.init(n);
     for (int r = 0; r < n; r++) {
         if (r > 0) getline(fin, buf);
         for (int c = 0; c < buf.size(); c++) {

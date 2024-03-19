@@ -1,5 +1,28 @@
-#include<bits/stdc++.h>
-#include "graph.h"
+#include<iostream>
+#include<fstream>
+#include<vector>
+#include<string>
+#include "graph.hpp"
+#include "graph_utils.hpp"
+#include "sat/cadical_wrapper.hpp"
+#include "sat/kissat_wrapper.hpp"
+
+using namespace std;
+
+int solve_graph(Graph &graph, std::vector<pair<int, int>> &coloring) {
+    std::vector<std::vector<int>> sat_instance;
+    graph_to_SAT(graph, sat_instance);
+
+    std::vector<int> sol;
+    graph.print(cout);
+    KissatWrapper solver;
+    int result = solver.solve(sat_instance, sol);
+    if (result != 10) {
+        return result;
+    }
+    sat_result_to_coloring(sol, coloring);
+    return result;
+}
 
 int main(int argc, char** argv) {
     if (argc != 4) return 0;
@@ -17,7 +40,7 @@ int main(int argc, char** argv) {
     int n_graphs = 0;
 
     Graph graph;
-    while(graph.parse_from_stream(in)) {
+    while(parse_graph(graph, in)) {
         cout << "New graph " << n_all << "\n";
         vector<bool> ST;
         spanning_tree(graph, ST);
