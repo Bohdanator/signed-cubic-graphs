@@ -5,7 +5,6 @@
 KissatWrapper::KissatWrapper() {
     _solver = kissat_init();
     kissat_set_option(_solver, "quiet", 1);
-    std::cout << "Initiated\n";
 }
 
 int KissatWrapper::solve(std::vector<std::vector<int>> &sat, std::vector<int> &sol) {
@@ -25,7 +24,6 @@ int KissatWrapper::solve(std::vector<std::vector<int>> &sat, std::vector<int> &s
     for (int i = 1; i < n+1; i++) {
         sol[i] = kissat_value(_solver, i);
     }
-    kissat_release(_solver);
     return result;
 }
 

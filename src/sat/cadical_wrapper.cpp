@@ -23,7 +23,6 @@ int CadicalWrapper::solve(std::vector<std::vector<int>> &sat, std::vector<int> &
     for (int i = 1; i < n+1; i++) {
         sol[i] = _solver->val(i);
     }
-    delete _solver;
     return result;
 }
 
