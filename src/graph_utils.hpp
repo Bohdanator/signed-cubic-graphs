@@ -1,7 +1,11 @@
 #ifndef GRAPH_UTILS_HPP
 #define GRAPH_UTILS_HPP
 
+#include<iostream>
+
 int parse_graph(Graph &graph, istream &stream);
+void print_graph(Graph &graph, ostream &out);
+void print_graph_adj(Graph &graph, ostream &out);
 int graph_from_edge_list(Graph &graph, istream &stream);
 void graph_from_signed_adj_matrix(Graph &graph, vector<vector<int>> &matrix);
 void graph_to_signed_adj_matrix(Graph &graph, vector<vector<int>> &matrix);

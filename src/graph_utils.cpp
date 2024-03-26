@@ -1,4 +1,5 @@
 #include "graph.hpp"
+#include "graph_utils.hpp"
 
 #include<vector>
 #include<string>
@@ -26,9 +27,37 @@ int parse_graph(Graph &graph, istream &stream) {
     return 0;
 }
 
+void print_graph(Graph &graph, ostream &out) {
+    out << graph.vertex.size() << " " << graph.edges.size() << "\n";
+    for (uint i = 0; i < graph.edges.size(); i++) {
+        for (uint j = 0; j < graph.edges[i].size(); j++) {
+            out << graph.edges[i][j] << ",";
+        }
+        out << " ";
+    }
+    out << "\n";
+}
+
+void print_graph_adj(Graph &graph, ostream &out) {
+    vector<vector<int>> matrix;
+    graph_to_signed_adj_matrix(graph, matrix);
+    cout << "n=" << graph.n() << "\n";
+    for (auto &x : matrix) {
+        for (auto y : x) {
+            out << y;
+        }
+        out << "\n";
+    }
+}
+
+void graph_from_signed_adj_matrix_stream(Graph &graph, istream &in) {
+
+}
+
 int graph_from_edge_list(Graph &graph, istream &stream) {
     int n, m;
     if (stream >> n >> m) {
+        graph.clear();
         graph.init(n);
         int a, b;
         for (auto i = 0; i < m; i++) {
@@ -58,10 +87,10 @@ void graph_to_signed_adj_matrix(Graph &graph, vector<vector<int>> &matrix) {
     matrix.resize(graph.n(), vector<int>(graph.n(), 0));
     for (auto e : graph.edges) {
         if (e[2]) {
-            matrix[e[2]][e[1]] = 1;
+            matrix[e[1]][e[0]] = 1;
             continue;
         }
-        matrix[e[1]][e[2]] = 1;
+        matrix[e[0]][e[1]] = 1;
     }
 }
 

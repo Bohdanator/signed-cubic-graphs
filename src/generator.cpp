@@ -41,19 +41,17 @@ public:
 };
 
 int main(int argc, char** argv) {
-    if (argc < 3) {
-        cout << "Usage: solver.o <snarks_file> <strong_colorables_file> thread(default=1) skip(default=0)\n";
-        return 0;
-    }
+    // if (argc < 2) {
+    //     cout << "Usage: generator.o thread(default=1) skip(default=0)\n";
+    //     return 0;
+    // }
 
     // INIT
-    string snarks_fn = argv[1];
-    string colorable_fn = argv[2];
-    int threads_n = (argc <= 3 ? 1 : stoi(argv[3]));
-    int skip_n = (argc <= 4 ? 0 : stoi(argv[4]));
+    int threads_n = (argc <= 1 ? 1 : stoi(argv[1]));
+    int skip_n = (argc <= 2 ? 0 : stoi(argv[2]));
 
-    ofstream snarks_out(snarks_fn, ofstream::ate);
-    ofstream colorable_out(colorable_fn, ofstream::ate);
+    string log_fn = "ssnark_generator_log.txt";
+    ofstream log(log_fn);
 
     // SKIP
     Graph tmp;
@@ -86,23 +84,22 @@ int main(int argc, char** argv) {
             threads[i].join();
             base_graphs_done++;
             if (base_graphs_done % 100 == 0) {
-                cout << base_graphs_done << " graphs done, "
-                     << snarks_n << "snarks\n";
+                log << base_graphs_done << " graphs done, "
+                    << snarks_n << " snarks\n";
+                log.flush();
             }
             if (snarks[i].size() == 0) {
-                print_graph(solvers[i].graph, colorable_out);
+                //print_graph(solvers[i].graph, colorable_out);
+                print_graph_adj(solvers[i].graph, cout);
                 continue;
             }
             snarks_n += snarks[i].size();
             for (auto &graph : snarks[i]) {
-                print_graph(graph, snarks_out);
+                //print_graph(graph, snarks_out);
+                print_graph_adj(graph, cout);
             }
         }
-        snarks_out.flush();
-        colorable_out.flush();
     }
-    cout << base_graphs_done << " graphs overall done." << endl;
-    cout << snarks_n << " signed snarks.\n";
-    snarks_out.close();
-    colorable_out.close();
+    log << base_graphs_done << " graphs overall done." << endl;
+    log << snarks_n << " signed snarks.\n";
 }

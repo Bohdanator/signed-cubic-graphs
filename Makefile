@@ -6,6 +6,10 @@ solver: src/solver.cpp src/sat/kissat_wrapper.hpp src/sat/kissat_wrapper.cpp src
 	@echo "Compiling solver"
 	g++ ${COMPILER_FLAGS} src/solver.cpp src/graph_utils.cpp src/sat/kissat_wrapper.cpp -o build/solver.o ${KISSAT_FLAGS}
 
-all: solver
+generator: src/generator.cpp src/sat/kissat_wrapper.hpp src/sat/kissat_wrapper.cpp src/graph_utils.hpp src/graph_utils.cpp
+	@echo "Compiling generator"
+	g++ ${COMPILER_FLAGS} src/generator.cpp src/graph_utils.cpp src/sat/kissat_wrapper.cpp -o build/generator.o ${KISSAT_FLAGS}
+
+all: solver generator
 
 clean: rm dumps/*.o

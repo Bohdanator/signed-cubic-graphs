@@ -32,17 +32,6 @@ public:
     inline int n() { return vertex.size(); }
     inline int m() { return edges.size(); }
 
-    void print(ostream &out = cout) {
-        out << vertex.size() << " " << edges.size() << "\n";
-        for (uint i = 0; i < edges.size(); i++) {
-            for (uint j = 0; j < edges[i].size(); j++) {
-                out << edges[i][j] << ",";
-            }
-            out << " ";
-        }
-        out << "\n";
-    }
-
     void add_edge(int u, int v, int sign=0) {
         if (adj_matrix[u][v] > -1) return;
         vector<int> e = {u, v, sign};
