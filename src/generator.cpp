@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
         // initiate solvers
         solvers_n = 0;
         vector<SolverThread> solvers;
-        while(graph_from_edge_list(buffer, cin) && solvers_n < threads_n) {
+        while(solvers_n < threads_n && graph_from_edge_list(buffer, cin)) {
             solvers.push_back(SolverThread(buffer, solvers_n));
             solvers_n++;
         }
