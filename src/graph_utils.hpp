@@ -16,13 +16,12 @@
 // }
 
 int parse_graph(Graph &graph, istream &stream) {
-    string buf;
+    string buf, u, v, s;
     int n, m;
-    string u, v, s;
+    graph.clear();
 
     if (stream >> n >> m) {
-        graph.vertex.resize(n, vector<int>(0));
-        graph.adj_matrix.resize(n, vector<int>(n, -1));
+        graph.init(n);
         for (int i = 0; i < m; i++) {
             stream >> buf;
             std::stringstream ss(buf);
@@ -30,6 +29,20 @@ int parse_graph(Graph &graph, istream &stream) {
             getline(ss, v, ',');
             getline(ss, s, ',');
             graph.add_edge(stoi(u), stoi(v), stoi(s));
+        }
+        return 1;
+    }
+    return 0;
+}
+
+int graph_from_edge_list(Graph &graph, istream &stream) {
+    int n, m;
+    if (stream >> n >> m) {
+        graph.init(n);
+        int a, b;
+        for (auto i = 0; i < m; i++) {
+            stream >> a >> b;
+            graph.add_edge(a,b);
         }
         return 1;
     }
@@ -102,7 +115,7 @@ void spanning_tree(Graph& graph, vector<bool>& ST) {
 }
 
 void next_signature(Graph &graph, vector<bool>& ST) {
-    int i = 0;
+    uint i = 0;
     while ((i < graph.m()) && (graph.edges[i][2] == 1 || ST[i])) {
         graph.edges[i][2] = 0;
         i++;
@@ -173,6 +186,18 @@ void sat_result_to_coloring(std::vector<int> &sol, std::vector<pair<int, int>> &
     }
 }
 
+bool same_base_graph(Graph &g1, Graph &g2) {
+    if ((g1.n() == g2.n()) && (g1.m() == g2.m())) {
+        for (auto i = 0; i < g1.m(); i++) {
+            if (g1.edges[i][0] == g2.edges[i][0] && g1.edges[i][1] == g2.edges[i][1])
+                continue;
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
 // void solve_each_signature(Graph &graph, bool unsat_only=false, bool print_graph=true) {
 //     vector<bool> ST;
 //     spanning_tree(graph, ST);
@@ -221,4 +246,3 @@ void sat_result_to_coloring(std::vector<int> &sol, std::vector<pair<int, int>> &
 //         next_signature(graph, ST);
 //     }
 // }
-

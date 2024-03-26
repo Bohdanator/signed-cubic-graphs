@@ -34,8 +34,8 @@ public:
 
     void print(ostream &out = cout) {
         out << vertex.size() << " " << edges.size() << "\n";
-        for (int i = 0; i < edges.size(); i++) {
-            for (int j = 0; j < edges[i].size(); j++) {
+        for (uint i = 0; i < edges.size(); i++) {
+            for (uint j = 0; j < edges[i].size(); j++) {
                 out << edges[i][j] << ",";
             }
             out << " ";
@@ -55,13 +55,15 @@ public:
 
     void signature(vector<int> &dest) {
         dest.resize(edges.size());
-        for (int i = 0; i < edges.size(); i++) {
+        for (uint i = 0; i < edges.size(); i++) {
             dest[i] = edges[i][2];
         }
     }
 
-    void adj(vector<vector<bool>> &matrix) {
-        matrix.resize(n(), vector<bool>(n(), false));
+    void operator=(Graph &other) {
+        vertex = other.vertex;
+        edges = other.edges;
+        adj_matrix = other.adj_matrix;
     }
 };
 

@@ -4,6 +4,7 @@
 #include<string>
 #include "graph.hpp"
 #include "graph_utils.hpp"
+#include "sat/sat_solver_wrapper.hpp"
 #include "sat/cadical_wrapper.hpp"
 #include "sat/kissat_wrapper.hpp"
 
@@ -14,7 +15,6 @@ int solve_graph(Graph &graph, std::vector<pair<int, int>> &coloring) {
     graph_to_SAT(graph, sat_instance);
 
     std::vector<int> sol;
-    graph.print(cout);
     KissatWrapper solver;
     int result = solver.solve(sat_instance, sol);
     if (result != 10) {
@@ -25,13 +25,15 @@ int solve_graph(Graph &graph, std::vector<pair<int, int>> &coloring) {
 }
 
 int main(int argc, char** argv) {
-    if (argc != 4) return 0;
+    if (argc != 5) return 0;
     string fin = argv[1];
     string snarks_fn = argv[2];
     string regular_fn = argv[3];
+    string colorable_fn = argv[4];
     ifstream in(fin);
-    ofstream snarks_out(snarks_fn, ofstream::ate);
-    ofstream regular_out(regular_fn, ofstream::ate);
+    ofstream snarks_out(snarks_fn);//, ofstream::ate);
+    ofstream colorable_out(colorable_fn);//, ofstream::ate);
+    // ofstream regular_out(regular_fn);//, ofstream::ate);
 
     Graph biggest;
     int n_biggest = 0;
@@ -41,7 +43,7 @@ int main(int argc, char** argv) {
 
     Graph graph;
     while(parse_graph(graph, in)) {
-        cout << "New graph " << n_all << "\n";
+        //cout << "New graph " << n_all << "\n";
         vector<bool> ST;
         spanning_tree(graph, ST);
 
@@ -52,11 +54,11 @@ int main(int argc, char** argv) {
             int result = solve_graph(graph, coloring);
             if (result == 10) {
                 // SAT
-                graph.print(regular_out);
-                for (auto x : coloring) {
-                    regular_out << x.first << "," << x.second << " ";
-                }
-                regular_out << "\n";
+                // graph.print(regular_out);
+                // for (auto x : coloring) {
+                //     regular_out << x.first << "," << x.second << " ";
+                // }
+                // regular_out << "\n";
             } else{
                 // UNSAT
                 graph.print(snarks_out);
@@ -64,7 +66,9 @@ int main(int argc, char** argv) {
             }
             next_signature(graph, ST);
         }
-
+        if (snarks == 0) {
+            graph.print(colorable_out);
+        }
         if (snarks > n_biggest) {
             n_biggest = snarks;
             biggest = graph;
@@ -74,7 +78,8 @@ int main(int argc, char** argv) {
         n_graphs++;
 
         snarks_out.flush();
-        regular_out.flush();
+        colorable_out.flush();
+        //regular_out.flush();
         graph.clear();
     }
 
@@ -82,6 +87,6 @@ int main(int argc, char** argv) {
     cout << (1 << (biggest.m() - biggest.n() + 1)) << " " << n_biggest << endl;
     biggest.print();
     snarks_out.close();
-    regular_out.close();
+    //regular_out.close();
     return 0;
 }
