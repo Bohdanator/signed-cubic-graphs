@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     int n_graphs = 0;
 
     Graph graph;
-    while(parse_graph(graph, in)) {
+    while(graph_from_edge_list(graph, in)) {
         //cout << "New graph " << n_all << "\n";
         vector<bool> ST;
         spanning_tree(graph, ST);
@@ -61,13 +61,13 @@ int main(int argc, char** argv) {
                 // regular_out << "\n";
             } else{
                 // UNSAT
-                graph.print(snarks_out);
+                print_graph(graph,snarks_out);
                 snarks++;
             }
             next_signature(graph, ST);
         }
         if (snarks == 0) {
-            graph.print(colorable_out);
+            print_graph(graph,colorable_out);
         }
         if (snarks > n_biggest) {
             n_biggest = snarks;
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 
     cout << n_graphs << " " << n_all << " " << n_snarks << endl;
     cout << (1 << (biggest.m() - biggest.n() + 1)) << " " << n_biggest << endl;
-    biggest.print();
+    print_graph(biggest, cout);
     snarks_out.close();
     //regular_out.close();
     return 0;

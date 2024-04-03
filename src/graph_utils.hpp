@@ -9,6 +9,7 @@ void print_graph_adj(Graph &graph, ostream &out);
 int graph_from_edge_list(Graph &graph, istream &stream);
 void graph_from_signed_adj_matrix(Graph &graph, vector<vector<int>> &matrix);
 void graph_to_signed_adj_matrix(Graph &graph, vector<vector<int>> &matrix);
+void graph_to_GAP_command(Graph &graph, ostream &stream);
 
 void graph_to_dot_colors(Graph &graph, ostream &stream, vector<pair<int, int>> colors);
 void graph_to_dot(Graph &graph, ostream &stream);

@@ -124,6 +124,16 @@ void graph_to_dot_ST(Graph &graph, ostream &stream, vector<bool> &ST) {
     stream << "}";
 }
 
+void graph_to_GAP_command(Graph &graph, ostream &stream) {
+    stream << "PrintIsoSignatures([], [";
+    for (uint i = 0; i < graph.edges.size(); i++) {
+        auto e = graph.edges[i];
+        stream << "[" << e[0] + 1 << "," << e[1] + 1 << "]";
+        if (i < graph.edges.size() - 1) stream << ",";
+    }
+    stream << "], 1);\n";
+}
+
 
 int number_of_triangles(Graph& graph) {
     int t = 0;
