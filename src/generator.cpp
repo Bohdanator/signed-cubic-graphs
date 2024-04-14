@@ -90,13 +90,13 @@ int main(int argc, char** argv) {
             }
             if (snarks[i].size() == 0) {
                 //print_graph(solvers[i].graph, colorable_out);
-                print_graph_adj(solvers[i].graph, cout);
+                print_graph_signed_adj(solvers[i].graph, cout);
                 continue;
             }
             snarks_n += snarks[i].size();
             for (auto &graph : snarks[i]) {
                 //print_graph(graph, snarks_out);
-                print_graph_adj(graph, cout);
+                print_graph_signed_adj(graph, cout);
             }
         }
     }

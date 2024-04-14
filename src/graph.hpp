@@ -32,6 +32,14 @@ public:
     inline int n() { return vertex.size(); }
     inline int m() { return edges.size(); }
 
+    void add_vertex() {
+        vertex.push_back({});
+        for (int i = 0; i < adj_matrix.size(); i++) {
+            adj_matrix[i].push_back(-1);
+        }
+        adj_matrix.push_back(vector<int>(vertex.size(), -1));
+    }
+
     void add_edge(int u, int v, int sign=0) {
         if (adj_matrix[u][v] > -1) return;
         vector<int> e = {u, v, sign};
@@ -40,6 +48,19 @@ public:
         adj_matrix[e[0]][e[1]] = edges.size();
         adj_matrix[e[1]][e[0]] = edges.size();
         edges.push_back(e);
+    }
+
+    void remove_edge(int u, int v) {
+        int a = min(u, v);
+        int b = max(u, v);
+        for (int i = 0; i < edges.size(); i++) {
+            if (edges[i][0] == a && edges[i][1] == b) {
+                edges.erase(edges.begin()+i);
+                break;
+            }
+        }
+        adj_matrix[u][v] = -1;
+        adj_matrix[v][u] = -1;
     }
 
     void signature(vector<int> &dest) {
