@@ -37,10 +37,24 @@ void print_graph(Graph &graph, ostream &out) {
     out << "\n";
 }
 
+void graph_from_signed_adj_matrix(Graph &graph, vector<vector<int>> &matrix) {
+    graph.clear();
+    graph.init(matrix.size());
+    for (uint i = 0; i < matrix.size(); i++) {
+        for (uint j = i+1; j < matrix.size(); j++) {
+            if (matrix[i][j]) {
+                graph.add_edge(i, j, 1);
+            } else if (matrix[j][i]) {
+                graph.add_edge(i, j, -1);
+            }
+        }
+    }
+}
+
 void graph_to_signed_adj_matrix(Graph &graph, vector<vector<int>> &matrix) {
     matrix.resize(graph.n(), vector<int>(graph.n(), 0));
     for (auto e : graph.edges) {
-        if (e[2]) {
+        if (e[2] == 1) {
             matrix[e[1]][e[0]] = 1;
             continue;
         }
@@ -82,10 +96,6 @@ void print_graph_edge_list(Graph &graph, ostream &out) {
     cout << "\n";
 }
 
-void graph_from_signed_adj_matrix_stream(Graph &graph, istream &in) {
-
-}
-
 int graph_from_edge_list(Graph &graph, istream &stream) {
     int n, m;
     if (stream >> n >> m) {
@@ -94,75 +104,20 @@ int graph_from_edge_list(Graph &graph, istream &stream) {
         int a, b;
         for (auto i = 0; i < m; i++) {
             stream >> a >> b;
-            graph.add_edge(a,b);
+            graph.add_edge(a,b,1);
         }
         return 1;
     }
     return 0;
 }
 
-void graph_from_signed_adj_matrix(Graph &graph, vector<vector<int>> &matrix) {
-    graph.clear();
-    graph.init(matrix.size());
-    for (uint i = 0; i < matrix.size(); i++) {
-        for (uint j = i+1; j < matrix.size(); j++) {
-            if (matrix[i][j]) {
-                graph.add_edge(i, j, 0);
-            } else if (matrix[j][i]) {
-                graph.add_edge(i, j, 1);
-            }
-        }
-    }
-}
-
-void graph_to_dot_colors(Graph &graph, ostream &stream, vector<pair<int, int>> colors) {
-    stream << "graph unsat_" << graph.n() << "_" << graph.m() << " {\n";
-    stream << "\tgraph [size=\"6,6\",ratio=fill];\n";
-    for (int i = 0; i < graph.n(); i++)
-        stream << "\t" << i << " [shape=circle];\n";
-    for (int i = 0; i < graph.m(); i++)
-        stream << "\t" << graph.edges[i][0] << " -- " << graph.edges[i][1] << (graph.edges[i][2] > 0 ? " [style=dashed," : "[") << "headlabel=" << colors[i].first << ", taillabel=" << colors[i].second << "]" << ";\n";
-    stream << "}";
-}
-
-void graph_to_dot(Graph &graph, ostream &stream) {
-    stream << "graph unsat_" << graph.n() << "_" << graph.m() << " {\n";
-    stream << "\tgraph [size=\"6,6\",ratio=fill];\n";
-    for (int i = 0; i < graph.n(); i++)
-        stream << "\t" << i << " [shape=circle];\n";
-    for (int i = 0; i < graph.m(); i++)
-        stream << "\t" << graph.edges[i][0] << " -- " << graph.edges[i][1] << (graph.edges[i][2] > 0 ? " [style=dashed," : "[") << "]" << ";\n";
-    stream << "}";
-}
-
-void graph_to_dot_ST(Graph &graph, ostream &stream, vector<bool> &ST) {
-    stream << "graph unsat_" << graph.n() << "_" << graph.m() << " {\n";
-    stream << "\tgraph [size=\"6,6\",ratio=fill];\n";
-    for (int i = 0; i < graph.n(); i++)
-        stream << "\t" << i << " [shape=circle];\n";
-    for (int i = 0; i < graph.m(); i++)
-        stream << "\t" << graph.edges[i][0] << " -- " << graph.edges[i][1] << (ST[i] ? "[style=bold, color=red" : (graph.edges[i][2] > 0 ? " [style=dashed," : "[") )<< "]" << ";\n";
-    stream << "}";
-}
-
-void graph_to_GAP_command(Graph &graph, ostream &stream) {
-    stream << "PrintIsoSignatures([], [";
-    for (uint i = 0; i < graph.edges.size(); i++) {
-        auto e = graph.edges[i];
-        stream << "[" << e[0] + 1 << "," << e[1] + 1 << "]";
-        if (i < graph.edges.size() - 1) stream << ",";
-    }
-    stream << "], 1);\n";
-}
-
-
 int number_of_triangles(Graph& graph) {
     int t = 0;
     for (int initial = 0; initial < graph.n(); initial++) {
         for (auto neigh : graph.vertex[initial]) {
             for (int common = 0; common < graph.n(); common++) {
-                if ((common == initial) || (common == neigh)) continue;
-                t += ((graph.adj_matrix[initial][common] >= 0) && (graph.adj_matrix[neigh][common] >= 0));
+                if ((common == initial) || (common == neigh.first)) continue;
+                t += ((graph.adj_matrix[initial][common] >= 0) && (graph.adj_matrix[neigh.first][common] >= 0));
             }
         }
     }
@@ -180,7 +135,8 @@ void spanning_tree(Graph& graph, vector<bool>& ST) {
         Q.pop();
         seen[v] = true;
 
-        for (auto neighbor : graph.vertex[v]) {
+        for (auto neighbor_pair : graph.vertex[v]) {
+            int neighbor = neighbor_pair.first;
             if (!seen[neighbor]) {
                 ST[graph.adj_matrix[v][neighbor]] = true;
                 Q.push(neighbor);
@@ -190,7 +146,9 @@ void spanning_tree(Graph& graph, vector<bool>& ST) {
     }
 }
 
-int n_signatures(Graph &graph) { return (1 << (graph.m() - graph.n() + 1)); }
+inline int n_signatures(Graph &graph) { return (1 << (graph.m() - graph.n() + 1)); }
+
+inline int cycle_space_dimension(Graph &graph) {return (graph.m() - graph.n() + 1); }
 
 void next_signature(Graph &graph, vector<bool>& ST) {
     uint i = 0;
@@ -208,8 +166,8 @@ void graph_to_unsigned_repr(Graph &graph) {
         if (edge[2]) {
             // negative edge, insert one vertex inbetween
             graph.add_vertex();
-            graph.add_edge(edge[0], graph.n()-1);
-            graph.add_edge(edge[1], graph.n()-1);
+            graph.add_edge(edge[0], graph.n()-1,1);
+            graph.add_edge(edge[1], graph.n()-1,1);
             graph.remove_edge(edge[0], edge[1]);
         }
     }
@@ -243,8 +201,10 @@ void graph_to_SAT(Graph &graph, vector<vector<int>> &sat) {
     // different colors for each vertex constraints
     // each pair of half-edges at a vertex is different
     for (int i = 0; i < graph.n(); i++) {
-        for (auto n1 : graph.vertex[i]) {
-            for (auto n2 : graph.vertex[i]) {
+        for (auto n1_pair : graph.vertex[i]) {
+            for (auto n2_pair : graph.vertex[i]) {
+                int n1 = n1_pair.first;
+                int n2 = n2_pair.first;
                 if (n1 <= n2) continue;
                 // starting colors
                 int e1 = 6*graph.adj_matrix[i][n1] + (n1 > i ? 4 : 1);
@@ -290,51 +250,91 @@ bool same_base_graph(Graph &g1, Graph &g2) {
     return false;
 }
 
-// void solve_each_signature(Graph &graph, bool unsat_only=false, bool print_graph=true) {
-//     vector<bool> ST;
-//     spanning_tree(graph, ST);
-//     vector<pair<int, int>> coloring;
-//     int n_signatures = (1 << (graph.m() - graph.n() + 1));
-//     int result;
-//     cout << "*** NEW GRAPH ***\n";
-//     for (int i = 0; i < n_signatures; i++) {
-//         result = solve_graph(graph, coloring);
-//         if (result != 10) {
-//             graph.print();
-//             cout << "UNSAT\n";
-//         } else if (!unsat_only) {
-//             graph.print();
-//             cout << "SAT\n";
-//             for (auto x : coloring) {
-//                 cout << x.first << "," << x.second << " ";
-//             }
-//             cout << "\n";
-//         }
-//         next_signature(graph, ST);
-//     }
-// }
+void generate_cycles(Graph &graph, vector<vector<pair<int, int>>> &result, int max_length) {
+    deque<vector<pair<int, int>>> Q;
+    // INIT
+    for (int i = 0; i < graph.n(); i++ ) {
+        Q.push_back(vector<pair<int,int>>(1, make_pair(i, 0)));
+    }
 
-// void solve_single_signature(Graph &graph) {
-//     vector<bool> ST;
-//     spanning_tree(graph, ST);
-//     vector<pair<int, int>> coloring(graph.m(), make_pair(2,2));
-//     int result = solve_graph(graph, coloring);
-//     if (result != 10) {
-//         graph.graph_to_dot(cout);
-//     } else {
-//         graph.graph_to_dot_colors(cout, coloring);
-//     }
-//     cout << "// " << (result != 10 ? "UNSAT\n" : "SAT\n");
-// }
+    // BFS
+    vector<pair<int,int>> potential_cycle;
+    int last, first;
+    while (!Q.empty()) {
+        potential_cycle = Q.front();
+        Q.pop_front();
+        // looking for cycles of max_length at the longest, we are counting the smallest (first) vertex twice
+        if (potential_cycle.size() > max_length + 1) continue;
+        first = potential_cycle[0].first;
+        last = potential_cycle[potential_cycle.size() - 1].first;
+        // each cycle starts with the lowest vertex, this way it gets counted only once and algorithm is faster
+        if (last < first) continue;
+        if (last == first && potential_cycle.size() > 3) {
+            // discard cycles of size 2 and break symmetry
+            if (potential_cycle[1].first < potential_cycle[potential_cycle.size() - 2].first) {
+                result.push_back(potential_cycle);
+            }
+            continue;
+        }
+        // add another vertex and continue
+        for (auto neighbor_pair : graph.vertex[last]) {
+            int neighbor = neighbor_pair.first;
+            int edge = neighbor_pair.second;
+            bool breaking = false;
+            for (int i = 1; i < potential_cycle.size(); i++) {
+                if (potential_cycle[i].first == neighbor) {
+                    breaking = true;
+                    break;
+                }
+            }
+            if (breaking) continue;
+            potential_cycle.push_back(make_pair(neighbor, edge));
+            Q.push_back(potential_cycle);
+            potential_cycle.pop_back();
+         }
+    }
+}
 
-// void solve_nothing(Graph &graph) {
-//     vector<bool> ST;
-//     spanning_tree(graph, ST);
-//     vector<string> names = {"cub04_1.gv", "cub04_2.gv", "cub04_3.gv", "cub04_4.gv", "cub04_5.gv", "cub04_6.gv", "cub04_7.gv", "cub04_8.gv"};
-//     int n_signatures = (1 << (graph.m() - graph.n() + 1));
-//     for (int i = 0; i < n_signatures; i++) {
-//         ofstream out(names[i]);
-//         graph.graph_to_dot_ST(out, ST);
-//         next_signature(graph, ST);
-//     }
-// }
+vector<uint> cycles_to_matrix(vector<vector<pair<int,int>>> cycles) {
+    vector<uint> matrix;
+    for (auto cycle : cycles) {
+        uint row = 0;
+        for (int i = 1; i < cycle.size(); i++) {
+            row |= (1 << cycle[i].second);
+        }
+        matrix.push_back(row);
+    }
+    // for (auto x : matrix) {
+    //     cout << x << " , ";
+    // }
+    // cout << "\n";
+    return matrix;
+}
+
+void matrix_to_basis(vector<uint> matrix) {
+    uint column;
+    for (uint i = 0; i < matrix.size(); i++) {
+        uint mask = (matrix[i] & (~matrix[i] + 1));
+        //cout << matrix[i] << " , " << mask << endl;
+        if (!matrix[i]) continue;
+        for (uint j = 0; j < matrix.size(); j++) {
+            if (j == i) continue;
+            if (matrix[j] & mask) {
+                matrix[j] ^= matrix[i];
+            }
+        }
+    }
+    vector<uint> new_matrix;
+    for (auto x : matrix) {
+        if (x) {
+            new_matrix.push_back(x);
+        }
+    }
+    //cout << new_matrix.size() << endl;
+    matrix = new_matrix;
+}
+
+void generate_cycle_space(Graph &graph, vector<vector<pair<int,int>>> cycles, vector<uint> cycle_matrix, vector<uint> reduced_cycle_matrix, int max_cycle_length) {
+    cycles.clear();
+
+}

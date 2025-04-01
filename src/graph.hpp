@@ -10,7 +10,7 @@ using namespace std;
 
 class Graph {
 public:
-    vector<vector<int>> vertex; // [neighbor, edge]
+    vector<vector<pair<int,int>>> vertex; // [neighbor, edge]
     vector<vector<int>> edges; // [u, v, sign]
     vector<vector<int>> adj_matrix;
 
@@ -18,8 +18,8 @@ public:
 
     // initialize empty graph with n vertices
     void init(int n) {
-        vertex = vector<vector<int>>(n, vector<int>(0));
-        adj_matrix = vector<vector<int>>(n, vector<int>(n, -1));
+        vertex = vector<vector<pair<int,int>>>(n, vector<pair<int,int>>(0));
+        adj_matrix = vector<vector<int>>(n, vector<int>(n, 0));
         edges = vector<vector<int>>(0);
     }
     // clear graph
@@ -35,16 +35,24 @@ public:
     void add_vertex() {
         vertex.push_back({});
         for (int i = 0; i < adj_matrix.size(); i++) {
-            adj_matrix[i].push_back(-1);
+            adj_matrix[i].push_back(0);
         }
         adj_matrix.push_back(vector<int>(vertex.size(), -1));
     }
 
-    void add_edge(int u, int v, int sign=0) {
-        if (adj_matrix[u][v] > -1) return;
+    inline int sign_of_edge(int e) {
+        return edges[e][2];
+    }
+
+    inline int sign_of_edge(int u, int v) {
+        return edges[adj_matrix[u][v]][2];
+    }
+
+    void add_edge(int u, int v, int sign) {
+        if (adj_matrix[u][v]) return;
         vector<int> e = {u, v, sign};
-        vertex[e[0]].push_back(e[1]);
-        vertex[e[1]].push_back(e[0]);
+        vertex[e[0]].push_back(make_pair(e[1],edges.size()));
+        vertex[e[1]].push_back(make_pair(e[0],edges.size()));
         adj_matrix[e[0]][e[1]] = edges.size();
         adj_matrix[e[1]][e[0]] = edges.size();
         edges.push_back(e);

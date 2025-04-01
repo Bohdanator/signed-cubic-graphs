@@ -5,6 +5,7 @@
 
 #include "graph.hpp"
 #include "graph_utils.hpp"
+#include "visualization.hpp"
 
 using namespace std;
 
@@ -24,13 +25,13 @@ int main(int argc, char** argv) {
             continue;
         }
         if (signatures >= max_signatures) {
-            prev_graph.print();
+            print_graph(prev_graph, cout);
         }
         signatures = 0;
         max_signatures = (1 << (curr_graph.m() - curr_graph.n() + 1)) - 1;
         prev_graph = curr_graph;
     }
     if (signatures >= max_signatures) {
-        prev_graph.print();
+        print_graph(prev_graph, cout);
     }
 }
