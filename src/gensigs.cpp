@@ -1,5 +1,6 @@
 #include "graph.hpp"
 #include "graph_utils.hpp"
+#include "visualization.hpp"
 #include<vector>
 #include<iostream>
 

@@ -6,6 +6,7 @@
 #include "graph.hpp"
 #include "graph_utils.hpp"
 #include "sat/kissat_wrapper.hpp"
+#include "visualization.hpp"
 
 using namespace std;
 

@@ -1,5 +1,7 @@
 #include<bits/stdc++.h>
 #include "graph.hpp"
+#include "graph_utils.hpp"
+#include "visualization.hpp"
 
 using namespace std;
 
@@ -27,12 +29,12 @@ int main(int argc, char** argv) {
         string buf;
         while(getline(in, buf)) {
             load_graph(in, graph);
-            graph.print();
+            print_graph(graph, cout);
         }
     } else {
         while(!cin.eof()) {
             load_graph(cin, graph);
-            graph.print();
+            print_graph(graph, cout);
         }
     }
 }
