@@ -24,17 +24,9 @@ public:
     SolverThread(Graph g, int i) : graph(g), id(i) {}
 
     void operator() () {
-        vector<vector<pair<int,int>>> result;
-        generate_cycles(graph, result, 8);
-        number_of_cycles[id] = result.size();
-        vector<uint> cycle_space = cycles_to_matrix(result);
-        matrix_to_basis(cycle_space);
-        uint dimension = cycle_space_dimension(graph);
-        if (cycle_space.size() < dimension) {
-            cout << "cycles of size 7 are not enough\n" << cycle_space.size() << " instead of " << dimension << "\n";
-            //print_graph(graph, cout);
-            cycles_not_enough[id] = true;
-        }
+        vector<Cycle> cycles;
+        int max_length;
+        vector<uint> cycle_space = generate_cycles_with_coverage(graph, cycles, max_length);
         uint sum = 0;
         for (auto x : cycle_space) {
             sum |= x;
@@ -44,9 +36,8 @@ public:
             //print_graph(graph,cout);
             cycles_not_enough[id] = true;
         }
-        if (cycles_not_enough[id]) {
-            cout << result.size() << " cycles total.\n";
-        }
+        number_of_cycles[id] = cycles.size();
+        cout << cycles.size() << " cycles total. " << max_length << " max length\n";
     }
 };
 
@@ -73,6 +64,8 @@ int main(int argc, char** argv) {
     int graphs_total = 0;
     int cycles_total = 0;
     int graphs_without_basis = 0;
+    int max_cycles = 0;
+    int min_cycles = INT32_MAX;
     int solvers_n = threads_n;
     Graph buffer;
     while(solvers_n == threads_n) {
@@ -86,9 +79,7 @@ int main(int argc, char** argv) {
         }
         // start threads
         vector<thread> threads;
-        number_of_cycles.clear();
         number_of_cycles.resize(solvers_n);
-        cycles_not_enough.clear();
         cycles_not_enough.resize(solvers_n);
         for (uint i = 0; i < solvers.size(); i++) {
             threads.push_back(thread(solvers[i]));
@@ -106,9 +97,12 @@ int main(int argc, char** argv) {
             if (cycles_not_enough[i]) {
                 graphs_without_basis++;
             }
+            max_cycles = max(max_cycles, number_of_cycles[i]);
+            min_cycles = min(min_cycles, number_of_cycles[i]);
         }
     }
     log << graphs_total << " graphs overall done." << endl;
     log << graphs_without_basis << " graphs can't be covered with cycles\n";
     log << cycles_total << " cycles.\n" << cycles_total / graphs_total << "\n";
+    log << "maximum " << max_cycles << "; minimum" << min_cycles;
 }
