@@ -85,5 +85,59 @@ public:
     }
 };
 
+class Cycle {
+public:
+    vector<vector<int>> cycle; // [vertex, edge, sign]
+    int cycle_sign;
+
+    Cycle() {
+        cycle_sign = 1;
+    };
+
+    Cycle(int initial_vertex) {
+        cycle_sign = 1;
+        add(initial_vertex, -1, 1);
+    }
+
+    inline int first_vertex() {
+        return cycle[0][0];
+    }
+
+    inline int last_vertex() {
+        return cycle[cycle.size() - 1][0];
+    }
+
+    inline int vertex_at(int index) {
+        return cycle[index][0];
+    }
+
+    inline bool complete() {
+        return first_vertex() == last_vertex();
+    }
+
+    // breaking symmetry by starting the cycle at the lowest vertex (rotation) and
+    // having the second vertex smaller than second to last vertex (direction)
+    inline bool symmetrically_lowest() {
+        return vertex_at(1) < vertex_at(length() - 1);
+    }
+
+    // vertex at length() is the same as vertex at 0 in a complete cycle
+    inline int length() {
+        return cycle.size() - 1;
+    }
+
+    void add(int vertex, int edge, int sign) {
+        vector<int> vec = {vertex, edge, sign};
+        cycle.push_back(vec);
+        cycle_sign *= sign;
+    }
+
+    void remove_last() {
+        vector<int> last = cycle[cycle.size() - 1];
+        cycle_sign *= last[2];
+        cycle.pop_back();
+    }
+};
+
 
 #endif
