@@ -29,8 +29,8 @@ public:
         adj_matrix.clear();
     }
 
-    inline int n() { return vertex.size(); }
-    inline int m() { return edges.size(); }
+    inline size_t n() { return vertex.size(); }
+    inline size_t m() { return edges.size(); }
 
     void add_vertex() {
         vertex.push_back({});
@@ -56,19 +56,6 @@ public:
         adj_matrix[e[0]][e[1]] = edges.size();
         adj_matrix[e[1]][e[0]] = edges.size();
         edges.push_back(e);
-    }
-
-    void remove_edge(int u, int v) {
-        int a = min(u, v);
-        int b = max(u, v);
-        for (int i = 0; i < edges.size(); i++) {
-            if (edges[i][0] == a && edges[i][1] == b) {
-                edges.erase(edges.begin()+i);
-                break;
-            }
-        }
-        adj_matrix[u][v] = -1;
-        adj_matrix[v][u] = -1;
     }
 
     void signature(vector<int> &dest) {
@@ -107,7 +94,7 @@ public:
         return cycle[cycle.size() - 1][0];
     }
 
-    inline int vertex_at(int index) {
+    inline size_t vertex_at(int index) {
         return cycle[index][0];
     }
 
@@ -122,7 +109,7 @@ public:
     }
 
     // vertex at length() is the same as vertex at 0 in a complete cycle
-    inline int length() {
+    inline size_t length() {
         return cycle.size() - 1;
     }
 

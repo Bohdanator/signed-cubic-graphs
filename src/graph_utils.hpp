@@ -13,7 +13,7 @@ int parse_graph(Graph &graph, istream &stream) {
 
     if (stream >> n >> m) {
         graph.init(n);
-        for (int i = 0; i < m; i++) {
+        for (size_t i = 0; i < m; i++) {
             stream >> buf;
             std::stringstream ss(buf);
             getline(ss, u, ',');
@@ -28,8 +28,8 @@ int parse_graph(Graph &graph, istream &stream) {
 
 void print_graph(Graph &graph, ostream &out) {
     out << graph.vertex.size() << " " << graph.edges.size() << "\n";
-    for (uint i = 0; i < graph.edges.size(); i++) {
-        for (uint j = 0; j < graph.edges[i].size(); j++) {
+    for (size_t i = 0; i < graph.edges.size(); i++) {
+        for (size_t j = 0; j < graph.edges[i].size(); j++) {
             out << graph.edges[i][j] << ",";
         }
         out << " ";
@@ -40,8 +40,8 @@ void print_graph(Graph &graph, ostream &out) {
 void graph_from_signed_adj_matrix(Graph &graph, vector<vector<int>> &matrix) {
     graph.clear();
     graph.init(matrix.size());
-    for (uint i = 0; i < matrix.size(); i++) {
-        for (uint j = i+1; j < matrix.size(); j++) {
+    for (size_t i = 0; i < matrix.size(); i++) {
+        for (size_t j = i+1; j < matrix.size(); j++) {
             if (matrix[i][j]) {
                 graph.add_edge(i, j, 1);
             } else if (matrix[j][i]) {
@@ -113,9 +113,9 @@ int graph_from_edge_list(Graph &graph, istream &stream) {
 
 int number_of_triangles(Graph& graph) {
     int t = 0;
-    for (int initial = 0; initial < graph.n(); initial++) {
+    for (size_t initial = 0; initial < graph.n(); initial++) {
         for (auto neigh : graph.vertex[initial]) {
-            for (int common = 0; common < graph.n(); common++) {
+            for (size_t common = 0; common < graph.n(); common++) {
                 if ((common == initial) || (common == neigh.first)) continue;
                 t += ((graph.adj_matrix[initial][common] >= 0) && (graph.adj_matrix[neigh.first][common] >= 0));
             }
@@ -146,9 +146,9 @@ void spanning_tree(Graph& graph, vector<bool>& ST) {
     }
 }
 
-inline int n_signatures(Graph &graph) { return (1 << (graph.m() - graph.n() + 1)); }
+inline size_t n_signatures(Graph &graph) { return (1 << (graph.m() - graph.n() + 1)); }
 
-inline int cycle_space_dimension(Graph &graph) {return (graph.m() - graph.n() + 1); }
+inline size_t cycle_space_dimension(Graph &graph) {return (graph.m() - graph.n() + 1); }
 
 bool next_signature(Graph &graph, vector<bool>& ST) {
     uint i = 0;
@@ -160,20 +160,6 @@ bool next_signature(Graph &graph, vector<bool>& ST) {
         graph.edges[i][2] = -1;
     }
     return i < graph.m();
-}
-
-void graph_to_unsigned_repr(Graph &graph) {
-    int e = graph.m();
-    for (int i = 0; i < e; i++) {
-        auto edge = graph.edges[i];
-        if (edge[2]) {
-            // negative edge, insert one vertex inbetween
-            graph.add_vertex();
-            graph.add_edge(edge[0], graph.n()-1,1);
-            graph.add_edge(edge[1], graph.n()-1,1);
-            graph.remove_edge(edge[0], edge[1]);
-        }
-    }
 }
 
 void graph_to_SAT(Graph &graph, vector<vector<int>> &sat) {
@@ -203,7 +189,7 @@ void graph_to_SAT(Graph &graph, vector<vector<int>> &sat) {
     }
     // different colors for each vertex constraints
     // each pair of half-edges at a vertex is different
-    for (int i = 0; i < graph.n(); i++) {
+    for (size_t i = 0; i < graph.n(); i++) {
         for (auto n1_pair : graph.vertex[i]) {
             for (auto n2_pair : graph.vertex[i]) {
                 int n1 = n1_pair.first;
@@ -223,7 +209,7 @@ void graph_to_SAT(Graph &graph, vector<vector<int>> &sat) {
 void sat_result_to_coloring(std::vector<int> &sol, std::vector<pair<int, int>> &coloring) {
     int m = (sol.size() - 1) / 6;
     coloring.resize(m, make_pair(2, 2));
-    for (int i = 0; i < m; i++) {
+    for (size_t i = 0; i < m; i++) {
         if (sol[6*i+1] > 0) {
             coloring[i].first = 1;
         } else if (sol[6*i+2] > 0) {
@@ -243,7 +229,7 @@ void sat_result_to_coloring(std::vector<int> &sol, std::vector<pair<int, int>> &
 
 bool same_base_graph(Graph &g1, Graph &g2) {
     if ((g1.n() == g2.n()) && (g1.m() == g2.m())) {
-        for (auto i = 0; i < g1.m(); i++) {
+        for (size_t i = 0; i < g1.m(); i++) {
             if (g1.edges[i][0] == g2.edges[i][0] && g1.edges[i][1] == g2.edges[i][1])
                 continue;
             return false;
@@ -305,7 +291,7 @@ void generate_cycles_with_cache(Graph &G, vector<Cycle> &C, vector<Cycle> cache,
 void generate_cycles(Graph &graph, vector<Cycle> &result, int max_length) {
     deque<Cycle> Q;
     // INIT
-    for (int i = 0; i < graph.n(); i++ ) {
+    for (size_t i = 0; i < graph.n(); i++ ) {
         Q.push_back(Cycle(i));
     }
 
@@ -335,7 +321,7 @@ void generate_cycles(Graph &graph, vector<Cycle> &result, int max_length) {
             if (neighbor < first) continue;
             bool breaking = false;
             // iterate the actual representation
-            for (int i = 1; i < potential_cycle.cycle.size(); i++) {
+            for (size_t i = 1; i < potential_cycle.cycle.size(); i++) {
                 if (potential_cycle.vertex_at(i) == neighbor) {
                     breaking = true;
                     break;
@@ -349,13 +335,13 @@ void generate_cycles(Graph &graph, vector<Cycle> &result, int max_length) {
     }
 }
 
-vector<uint> cycles_to_matrix(vector<Cycle> &cycles) {
-    vector<uint> matrix;
-    for (uint j = 0; j < cycles.size(); j++) {
+vector<vector<bool>> cycles_to_matrix(vector<Cycle> &cycles) {
+    vector<vector<bool>> matrix;
+    for (size_t j = 0; j < cycles.size(); j++) {
         Cycle cycle = cycles[j];
-        uint row = 0;
-        for (int i = 1; i < cycle.cycle.size(); i++) {
-            row |= (1 << cycle.cycle[i][1]);
+        vector<bool> row(cycle.cycle.size(), 0);
+        for (size_t i = 1; i < cycle.cycle.size(); i++) {
+            row[i] = 1;
         }
         matrix.push_back(row);
     }
@@ -366,37 +352,79 @@ vector<uint> cycles_to_matrix(vector<Cycle> &cycles) {
     return matrix;
 }
 
-void matrix_to_basis(vector<uint> &matrix) {
-    uint column;
-    for (uint i = 0; i < matrix.size(); i++) {
-        uint mask = (matrix[i] & (~matrix[i] + 1));
-        //cout << matrix[i] << " , " << mask << endl;
-        if (!matrix[i]) continue;
-        for (uint j = 0; j < matrix.size(); j++) {
+vector<bool> row_not(vector<bool> row) {
+    vector<bool> res(row.size());
+    for (size_t i = 0; i < row.size(); i++) {
+        res[i] = !row[i];
+    }
+    return res;
+}
+
+vector<bool> row_and(vector<bool> a, vector<bool> b) {
+    size_t l = min(a.size(), b.size());
+    vector<bool> res(l);
+    for (size_t i = 0; i < l; i++) {
+        res[i] = a[i] && b[i];
+    }
+    return res;
+}
+
+vector<bool> row_xor(vector<bool> a, vector<bool> b) {
+    size_t l = min(a.size(), b.size());
+    vector<bool> res(l);
+    for (size_t i = 0; i < l; i++) {
+        res[i] = a[i] != b[i];
+    }
+    return res;
+}
+
+bool row_any(vector<bool> row) {
+    for (size_t i = 0; i < row.size(); i++) {
+        if (row[i]) return 1;
+    }
+    return 0;
+}
+
+vector<bool> row_plus(vector<bool> row) {
+    vector<bool> res(row);
+    size_t i = 0;
+    while(i < row.size() && row[i]) {
+        res[i] = 0;
+        i++;
+    }
+    if (i < res.size()) res[i] = 1;
+    return res;
+}
+
+void matrix_to_basis(vector<vector<bool>> &matrix) {
+    for (size_t i = 0; i < matrix.size(); i++) {
+        vector<bool> mask = row_and(matrix[i], row_not(row_plus(matrix[i])));
+        if (!row_any(matrix[i])) continue;
+        for (size_t j = 0; j < matrix.size(); j++) {
             if (j == i) continue;
-            if (matrix[j] & mask) {
-                matrix[j] ^= matrix[i];
+            if (row_any(row_and(matrix[j], mask))) {
+                matrix[j] = row_xor(matrix[j], matrix[i]);
             }
         }
     }
-    vector<uint> new_matrix;
+    vector<vector<bool>> new_matrix;
     for (auto x : matrix) {
-        if (x) {
+        if (row_any(x)) {
             new_matrix.push_back(x);
         }
     }
-    //cout << new_matrix.size() << endl;
     matrix = new_matrix;
 }
 
-vector<uint> generate_cycles_with_coverage(Graph &G, vector<Cycle> &C, int &max_length) {
+vector<vector<bool>> generate_cycles_with_coverage(Graph &G, vector<Cycle> &C, int &max_length) {
     vector<Cycle> cache;
-    for (int i = 0; i < G.n(); i++ ) {
+    C.clear();
+    for (size_t i = 0; i < G.n(); i++ ) {
         cache.push_back(Cycle(i));
     }
     bool covered = false;
     max_length = 3;
-    vector<uint> matrix;
+    vector<vector<bool>> matrix;
     while (!covered) {
         generate_cycles_with_cache(G, C, cache, max_length);
         matrix = cycles_to_matrix(C);
@@ -414,7 +442,7 @@ void add_cycle_vertices(Graph &graph, vector<Cycle> &cycles) {
         int cycle_vertex = graph.n();
         graph.add_vertex();
         // connect new vertex to vertices of the cycle
-        for (int i = 0; i < cycle.length(); i++) {
+        for (size_t i = 0; i < cycle.length(); i++) {
             graph.add_edge(cycle.vertex_at(i), cycle_vertex, 1);
         }
         // add tails
@@ -433,9 +461,9 @@ void add_cycle_vertices(Graph &graph, vector<Cycle> &cycles) {
 // compute which cycles is given vertex present
 void edge_cycle_mapping(vector<Cycle> &cycles, vector<vector<int>> &mapping, int m) {
     mapping.resize(m);
-    for (uint cycle_index = 0; cycle_index < cycles.size(); cycle_index++) {
+    for (size_t cycle_index = 0; cycle_index < cycles.size(); cycle_index++) {
         Cycle cycle = cycles[cycle_index];
-        for (uint i = 1; i < cycle.cycle.size(); i++) {
+        for (size_t i = 1; i < cycle.cycle.size(); i++) {
             mapping[cycle.cycle[i][1]].push_back(cycle_index);
         }
     }

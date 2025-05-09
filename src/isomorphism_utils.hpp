@@ -20,15 +20,24 @@ int generate_non_isomorphic_graphs(Graph &base, vector<Graph> &non_isomorphic) {
     vector<vector<int>> mapping;
     edge_cycle_mapping(cycles, mapping, base.m());
 
-    graph nauty_graph[MAXN*MAXM];
+    static DEFAULTOPTIONS_GRAPH(options);
+    options.getcanon = true;
+    options.schreier = true;
+    statsblk stats;
     int n = base.n() + 3*cycles.size();
     int m = SETWORDSNEEDED(n);
     nauty_check(WORDSIZE, m, n, NAUTYVERSIONID);
-    EMPTYGRAPH(nauty_graph, m, n);
+
+    graph nauty_graph[m*(size_t)n];
+    graph canon[m*(size_t)n];
+    int lab[n];
+    int ptn[n];
+    int orbits[n];
 
     uint cycle_vertex;
     Cycle cycle;
     // reconstruct base graph
+    EMPTYGRAPH(nauty_graph,m,n);
     for (auto edge : base.edges) {
         ADDONEEDGE(nauty_graph, edge[0], edge[1], m);
     }
@@ -43,16 +52,10 @@ int generate_non_isomorphic_graphs(Graph &base, vector<Graph> &non_isomorphic) {
     }
 
     vector<graph*> canons;
-    canons.push_back(new graph[MAXM*MAXN]);
     size_t n_canons = 0;
-    static DEFAULTOPTIONS_DENSEGRAPH(options);
-    options.getcanon = true;
-    options.schreier = true;
 
     bool computing = true;
     size_t k, c;
-    int lab[MAXN], ptn[MAXN], orbits[MAXN];
-    statsblk stats;
     k = 0;
     while (computing) {
         for (uint cind = 0; cind < cycles.size(); cind++) {
@@ -61,13 +64,12 @@ int generate_non_isomorphic_graphs(Graph &base, vector<Graph> &non_isomorphic) {
                 ADDONEEDGE(nauty_graph, cycle_vertex, cycle_vertex + 2, m);
             }
         }
-
         // compute canonical form
-        densenauty(nauty_graph, lab, ptn, orbits, &options, &stats, m, n, canons[n_canons]);
+        densenauty(nauty_graph, lab, ptn, orbits, &options, &stats, m, n, canon);
 
         for (c = 0; c < n_canons; c++) {
             for (k = 0; k < m*(size_t)n; k++) {
-                if (canons[c][k] != canons[n_canons][k]) {
+                if (canons[c][k] != canon[k]) {
                     break;
                 }
             }
@@ -77,9 +79,12 @@ int generate_non_isomorphic_graphs(Graph &base, vector<Graph> &non_isomorphic) {
             }
         }
         if (c == n_canons) {
-            n_canons++;
-            canons.push_back(new graph[MAXM*MAXN]);
             non_isomorphic.push_back(base);
+            canons.push_back(new graph[m*(size_t)n]);
+            for (c = 0; c < m*(size_t)n; c++) {
+                canons[n_canons][c] = canon[c];
+            }
+            n_canons++;
         }
         for (uint cind = 0; cind < cycles.size(); cind++) {
             int cycle_vertex = base.n() + 3*cind;
@@ -89,5 +94,6 @@ int generate_non_isomorphic_graphs(Graph &base, vector<Graph> &non_isomorphic) {
         }
         computing = next_signature_cycles(base, cycles, ST, mapping);
     }
+
     return n_canons;
 }

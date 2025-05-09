@@ -1,92 +1,110 @@
 #include<iostream>
 #include<fstream>
 #include<vector>
+#include<algorithm>
 #include<string>
 #include "graph.hpp"
 #include "graph_utils.hpp"
-#include "sat/sat_solver_wrapper.hpp"
-#include "sat/cadical_wrapper.hpp"
 #include "sat/kissat_wrapper.hpp"
 
 using namespace std;
 
-int solve_graph(Graph &graph, std::vector<pair<int, int>> &coloring) {
-    std::vector<std::vector<int>> sat_instance;
-    graph_to_SAT(graph, sat_instance);
-
-    std::vector<int> sol;
-    KissatWrapper solver;
-    int result = solver.solve(sat_instance, sol);
-    if (result != 10) {
-        return result;
-    }
-    sat_result_to_coloring(sol, coloring);
-    return result;
-}
-
 int main(int argc, char** argv) {
-    if (argc != 5) return 0;
-    string fin = argv[1];
-    string snarks_fn = argv[2];
-    string regular_fn = argv[3];
-    string colorable_fn = argv[4];
-    ifstream in(fin);
-    ofstream snarks_out(snarks_fn);//, ofstream::ate);
-    ofstream colorable_out(colorable_fn);//, ofstream::ate);
-    // ofstream regular_out(regular_fn);//, ofstream::ate);
+    int total_graphs = 0;
+    int total_signatures = 0;
+    int total_non_iso = 0;
+    int total_snarks = 0;
+    int total_strong_colorable = 0;
+    Graph least_nonzero_colorable;
+    int lnzc = 10000000;
+    Graph most_nonstrong_colorable;
+    int mnsc = 0;
+    Graph most_snark;
+    float ms = 0;
+    int msint = 0;
+    int msnoniso = 0;
+    Graph most_colorable;
+    float mc = 1;
+    int mcint = 0;
+    int mcnoniso = 0;
+    vector<int> n_snarks_vec;
+    vector<int> n_iso_vec;
+    Graph least_iso;
+    int lizo = 10000000;
 
-    Graph biggest;
-    int n_biggest = 0;
-    int n_snarks = 0;
-    int n_all = 0;
-    int n_graphs = 0;
+    Graph buf;
+    int noniso, snark;
+    string word;
+    cout << "Parsing graphs...";
+    while(parse_graph(buf, cin)) {
+        total_graphs++;
+        total_signatures += n_signatures(buf);
+        cin >> word >> noniso;
+        cin >> word >> snark;
 
-    Graph graph;
-    while(graph_from_edge_list(graph, in)) {
-        //cout << "New graph " << n_all << "\n";
-        vector<bool> ST;
-        spanning_tree(graph, ST);
+        n_iso_vec.push_back(noniso);
+        n_snarks_vec.push_back(snark);
+        total_non_iso += noniso;
+        total_snarks += snark;
 
-        vector<pair<int, int>> coloring;
-        int snarks = 0;
-        int n_signatures = (1 << (graph.m() - graph.n() + 1));
-        for(int i = 0; i < n_signatures; i++) {
-            int result = solve_graph(graph, coloring);
-            if (result == 10) {
-                // SAT
-                // graph.print(regular_out);
-                // for (auto x : coloring) {
-                //     regular_out << x.first << "," << x.second << " ";
-                // }
-                // regular_out << "\n";
-            } else{
-                // UNSAT
-                print_graph(graph,snarks_out);
-                snarks++;
-            }
-            next_signature(graph, ST);
+        if (noniso < lizo) {
+            least_iso = buf;
+            lizo = noniso;
         }
-        if (snarks == 0) {
-            print_graph(graph,colorable_out);
+        if (snark == 0) {
+            total_strong_colorable += 1;
         }
-        if (snarks > n_biggest) {
-            n_biggest = snarks;
-            biggest = graph;
+        if (snark < noniso && snark > mnsc) {
+            mnsc = snark;
+            most_nonstrong_colorable = buf;
         }
-        n_snarks += snarks;
-        n_all += n_signatures;
-        n_graphs++;
-
-        snarks_out.flush();
-        colorable_out.flush();
-        //regular_out.flush();
-        graph.clear();
+        if (snark > 0 && snark < lnzc) {
+            lnzc = snark;
+            least_nonzero_colorable = buf;
+        }
+        if (snark < noniso && ((float)snark / (float)noniso) > ms) {
+            ms = snark / noniso;
+            msint = snark;
+            msnoniso = noniso;
+            most_snark = buf;
+        }
+        if (snark > 0 && ((float)snark / (float)noniso) < mc) {
+            mc = snark / noniso;
+            mcint = snark;
+            mcnoniso = noniso;
+            most_colorable = buf;
+        }
     }
 
-    cout << n_graphs << " " << n_all << " " << n_snarks << endl;
-    cout << (1 << (biggest.m() - biggest.n() + 1)) << " " << n_biggest << endl;
-    print_graph(biggest, cout);
-    snarks_out.close();
-    //regular_out.close();
-    return 0;
+    sort(n_iso_vec.begin(), n_iso_vec.end());
+    sort(n_snarks_vec.begin(), n_snarks_vec.end());
+
+    cout << "done\nSTATS:\n";
+    cout << "Total graphs: " << total_graphs << endl;
+    cout << "Total non equivalent signatures: " << total_signatures << " avg " << total_signatures / total_graphs << endl;
+    cout << "Total non switching isomorphic: " << total_non_iso << ", " << total_non_iso * 100.0 / total_signatures << " %, avg " << total_non_iso / total_graphs << endl;
+    cout << "Total signed snarks " << total_snarks << ", " <<  100.0 * total_snarks / total_non_iso << " %" << "\n";
+    cout << "Total strong colorable " << total_strong_colorable << ", " << 100.0 * total_strong_colorable / total_non_iso << "%\n\n";
+
+    cout << "Swithing iso distribution\n";
+    cout << n_iso_vec[0] << " " << n_iso_vec[n_iso_vec.size()/2] << " " << n_iso_vec[n_iso_vec.size() - 1] << "\n\n";
+    cout << "Snarks distribution\n";
+    cout << n_snarks_vec[0] << " " << n_snarks_vec[n_snarks_vec.size()/2] << " " << n_snarks_vec[n_snarks_vec.size() - 1] << "\n\n";
+
+    cout << "Least non iso overall " << lizo << "\n";
+    print_graph(least_iso, cout);
+    cout << "Least colorable overall, " << lnzc << "\n";
+    print_graph(least_nonzero_colorable, cout);
+    cout << "Least colorable percentage, " << ms  << " " << msint << " " << msnoniso << endl;
+    print_graph(most_snark, cout);
+    cout << "Most colorable overall, " << mnsc << "\n";
+    print_graph(most_nonstrong_colorable, cout);
+    cout << "Most colorable percentage, " << (float)1 - mc << " " << mcint << " " << mcnoniso << endl;
+    print_graph(most_colorable, cout);
+
+    cout << endl;
+    cout << least_iso.n() << " & " << n_iso_vec.size() << " & "  << total_signatures / total_graphs << " & " << total_signatures << " & " << total_non_iso << " & " << n_iso_vec[0] << " & " << (float)total_non_iso / (float)total_graphs << " & " << total_non_iso * 100.0 / total_signatures << "\\% \\\\\n";
+    cout << endl;
+    cout << least_iso.n() << " & " << n_iso_vec.size() << " & "  << total_non_iso << " & " << total_strong_colorable << " & " << 100.0 * total_strong_colorable / total_graphs << "\\% & " << total_snarks << " & " << 100.0 * total_snarks / total_non_iso << "\\% \\\\\n";
+    cout << "Done.\n";
 }

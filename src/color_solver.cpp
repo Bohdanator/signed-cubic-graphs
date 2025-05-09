@@ -19,14 +19,15 @@ string vertex_dir = "results/";
 string strong_snarks_fn = "strong_snarks.txt";
 string strong_colorable_fn = "strong_colorable.txt";
 string signed_snarks_fn = "signed_snarks.txt";
-string signed_colorable_fn = "signed_colorable.txt";
 string stats_fn = "stats.txt";
 
 ofstream strong_snarks;
 ofstream strong_colorable;
 ofstream signed_snarks;
-ofstream signed_colorable;
 ofstream stats;
+
+int processed_graphs = 0;
+int PROCESSED_MOD = 500;
 
 class SolverThread
 {
@@ -40,6 +41,7 @@ public:
     SolverThread() = default;
 
     void operator() () {
+
         while (1) {
             {
                 lock_guard<mutex> lock(stream_lock);
@@ -82,7 +84,7 @@ public:
 
     void print_results() {
         print_graph(base, stats);
-        stats << n_non_isomorphic << " " << colorable.size() << " " << snarks.size() << "\n";
+        stats << "non_isomorphic " << n_non_isomorphic << "\ncolorable " << colorable.size() << "\nsnarks " << snarks.size() << "\n";
         if (snarks.size() == 0) {
             print_graph(base, strong_colorable);
         }
@@ -92,35 +94,36 @@ public:
         for (auto g : snarks) {
             print_graph(g, signed_snarks);
         }
-        for (auto gpair : colorable) {
-            print_graph(gpair.first, signed_colorable);
-            for (auto c : gpair.second) {
-                signed_colorable << c.first << " " << c.second << " ";
-            }
-            signed_colorable << "\n";
+        if (++processed_graphs % PROCESSED_MOD == 0) {
+            cout << "checkpoint: " << processed_graphs << " graphs done\n";
         }
     }
 };
 
 int main(int argc, char** argv) {
-    ios_base::sync_with_stdio(false);
-    cin.tie(nullptr);
-    cout.tie(nullptr);
 
     if (argc > 1) {
         vertex_dir = argv[1];
     }
     int n_threads = thread::hardware_concurrency();
     if (argc > 2) n_threads = stoi(argv[2]);
+    int to_skip = 0;
+    if (argc > 3) to_skip = stoi(argv[3]);
 
-    strong_snarks.open(root_dir + vertex_dir + strong_snarks_fn);
-    strong_colorable.open(root_dir + vertex_dir + strong_colorable_fn);
-    signed_snarks.open(root_dir + vertex_dir + signed_snarks_fn);
-    signed_colorable.open(root_dir + vertex_dir + signed_colorable_fn);
-    stats.open(root_dir + vertex_dir + stats_fn);
+    strong_snarks.open(root_dir + vertex_dir + strong_snarks_fn, ofstream::app);
+    strong_colorable.open(root_dir + vertex_dir + strong_colorable_fn, ofstream::app);
+    signed_snarks.open(root_dir + vertex_dir + signed_snarks_fn, ofstream::app);
+    stats.open(root_dir + vertex_dir + stats_fn, ofstream::app);
 
     vector<SolverThread> solvers(n_threads);
     cout << "Starting computation on " << n_threads << " threads.\n";
+    cout << "Skipping " << to_skip << " graphs... ";
+    Graph buffer;
+    while(to_skip-- > 0) {
+        parse_graph(buffer, cin);
+    }
+    cout << "Done.\n";
+    cout.flush();
     vector<thread> threads;
     for (size_t i = 0; i < n_threads; i++) {
         lock_guard<mutex> lock(stream_lock);
@@ -129,7 +132,7 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < n_threads; i++) {
         threads[i].join();
         lock_guard<mutex> lock(stream_lock);
-        cout << "joined a thread\n";
+        cout << "joined thread\n";
     }
     cout << "Done.\n";
 }
