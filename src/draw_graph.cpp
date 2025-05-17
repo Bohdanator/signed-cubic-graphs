@@ -1,6 +1,7 @@
 #include<bits/stdc++.h>
 #include "graph.hpp"
 #include "graph_utils.hpp"
+#include "visualization.hpp"
 
 int main() {
     Graph graph;

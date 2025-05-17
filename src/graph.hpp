@@ -29,8 +29,8 @@ public:
         adj_matrix.clear();
     }
 
-    inline int n() { return vertex.size(); }
-    inline int m() { return edges.size(); }
+    inline size_t n() { return vertex.size(); }
+    inline size_t m() { return edges.size(); }
 
     void add_vertex() {
         vertex.push_back({});
@@ -58,19 +58,6 @@ public:
         edges.push_back(e);
     }
 
-    void remove_edge(int u, int v) {
-        int a = min(u, v);
-        int b = max(u, v);
-        for (int i = 0; i < edges.size(); i++) {
-            if (edges[i][0] == a && edges[i][1] == b) {
-                edges.erase(edges.begin()+i);
-                break;
-            }
-        }
-        adj_matrix[u][v] = -1;
-        adj_matrix[v][u] = -1;
-    }
-
     void signature(vector<int> &dest) {
         dest.resize(edges.size());
         for (uint i = 0; i < edges.size(); i++) {
@@ -82,6 +69,60 @@ public:
         vertex = other.vertex;
         edges = other.edges;
         adj_matrix = other.adj_matrix;
+    }
+};
+
+class Cycle {
+public:
+    vector<vector<int>> cycle; // [vertex, edge, sign]
+    int cycle_sign;
+
+    Cycle() {
+        cycle_sign = 1;
+    };
+
+    Cycle(int initial_vertex) {
+        cycle_sign = 1;
+        add(initial_vertex, -1, 1);
+    }
+
+    inline int first_vertex() {
+        return cycle[0][0];
+    }
+
+    inline int last_vertex() {
+        return cycle[cycle.size() - 1][0];
+    }
+
+    inline size_t vertex_at(int index) {
+        return cycle[index][0];
+    }
+
+    inline bool complete() {
+        return first_vertex() == last_vertex();
+    }
+
+    // breaking symmetry by starting the cycle at the lowest vertex (rotation) and
+    // having the second vertex smaller than second to last vertex (direction)
+    inline bool symmetrically_lowest() {
+        return vertex_at(1) < vertex_at(length() - 1);
+    }
+
+    // vertex at length() is the same as vertex at 0 in a complete cycle
+    inline size_t length() {
+        return cycle.size() - 1;
+    }
+
+    void add(int vertex, int edge, int sign) {
+        vector<int> vec = {vertex, edge, sign};
+        cycle.push_back(vec);
+        cycle_sign *= sign;
+    }
+
+    void remove_last() {
+        vector<int> last = cycle[cycle.size() - 1];
+        cycle_sign *= last[2];
+        cycle.pop_back();
     }
 };
 
