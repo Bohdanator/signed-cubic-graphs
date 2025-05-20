@@ -7,6 +7,4 @@ build/*
 graphviz/*
 nauty/
 snarkhunter/
-results
-notes
 *.o
