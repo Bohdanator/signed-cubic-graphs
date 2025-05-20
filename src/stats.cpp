@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
     cout << "Most colorable percentage, " << (float)1 - mc << " " << mcint << " " << mcnoniso << endl;
     print_graph(most_colorable, cout);
 
-    cout << endl;
+    cout << endl << "Output for latex table\n";
     cout << least_iso.n() << " & " << n_iso_vec.size() << " & "  << total_signatures / total_graphs << " & " << total_signatures << " & " << total_non_iso << " & " << n_iso_vec[0] << " & " << (float)total_non_iso / (float)total_graphs << " & " << total_non_iso * 100.0 / total_signatures << "\\% \\\\\n";
     cout << endl;
     cout << least_iso.n() << " & " << n_iso_vec.size() << " & "  << total_non_iso << " & " << total_strong_colorable << " & " << 100.0 * total_strong_colorable / total_graphs << "\\% & " << total_snarks << " & " << 100.0 * total_snarks / total_non_iso << "\\% \\\\\n";

@@ -1,10 +1,14 @@
 .vscode
+
 graph-data/*
 sat-data/*
 images/*
 dumps/*
 build/*
 graphviz/*
-nauty/
+
+nauty/*.a
+nauty/*.o
+
 snarkhunter/
 *.o
